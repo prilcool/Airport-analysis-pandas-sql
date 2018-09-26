@@ -33,3 +33,72 @@ data[(data.iso_region == 'US-CA') &
 
 data_freq[data_freq.airport_ident == 'KLAX'].\
     sort_values('id', ascending=False)
+
+#https://codeburst.io/how-to-rewrite-your-sql-queries-in-pandas-and-more-149d341fc53e
+
+'''IN and NOT IN filter options '''
+
+data[data.type.isin(['heliport', 'balloonport'])]
+data[~data.type.isin(['heliport', 'balloonport'])]
+
+
+'''
+GROUP BY, ORDER BY, COUNT
+.count() will return number of non-null and NaN values 
+
+To get same result as SQL count, use. size()  
+'''
+
+data.groupby(['iso_country', 'type']).size()
+
+data.groupby(['iso_country', 'type'])\
+    .size().to_frame('size')\
+    .reset_index().sort_values(['iso_country', 'size']
+                               , ascending=[True, False])
+
+'''
+HAVING clause 
+In pandas, can use .filter() function and provide a Python function
+that will return True if group should be included into the result  
+'''
+
+data[data.iso_country == 'US']\
+    .groupby('type').filter(lambda g: len(g) > 100)\
+    .groupby('type').size().sort_values(ascending=False)
+
+'''
+Top N records 
+'''
+data.head(3)
+
+# Order things by airport count and select only top 10 countries
+
+data.nlargest(10, columns = 'elevation_ft')
+data.nlargest(20, columns = 'elevation_ft').tail(10)
+
+'''
+Aggregate functions 
+(Minimum, Maximum and Mean estimates) 
+'''
+runway_data.agg({'length_ft': ['min', 'max', 'mean', 'median']}).T
+
+'''
+JOIN - Using merge() to join pandas dataframes. 
+'''
+
+data_freq.merge(data[data.ident=='KLAX'][['id']],
+                left_on='airport_ref',
+                right_on = 'id',
+                how = 'inner')[['airport_ident', 'type',
+                                'description', 'frequency_mhz']]
+'''
+UNION ALL & UNION 
+'''
+
+pd.concat([data[data.ident == 'KLAX']
+           [['name', 'municipality']], data[data.ident == 'KLGB'][['name', 'municipality']]])
+
+'''
+INSERT statements 
+
+'''
